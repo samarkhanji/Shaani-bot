@@ -69,7 +69,7 @@ module.exports.run = async function ({ api, event, args }) {
         const author = firstResult.author.name;
         const thumbnail = firstResult.thumbnail;
 
-        await api.editMessage(` »»𝑶𝑾𝑵𝑬𝑹««★™  »»𝑺𝑯𝑨𝑨𝑵 𝑲𝑯𝑨𝑵««
+        await api.editMessage(` »»𝑶𝑾𝑵𝑬𝑹««★™  »»𝑺𝐔𝐇𝐄𝐁 𝑲𝑯𝑨𝑵««
           🥀𝒀𝑬 𝑳𝑶 𝑩𝑨𝑩𝒀 𝑨𝑷𝑲𝑰👉: ${title}\n\n${frames[1]}`, searchMsg.messageID, event.threadID);
         await api.editMessage(`🎵 Downloading...\n\n${frames[2]}`, searchMsg.messageID, event.threadID);
 
