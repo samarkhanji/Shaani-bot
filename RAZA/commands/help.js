@@ -1,89 +1,97 @@
- module.exports.config = {
-	name: "help",
-	version: "1.0.2",
-	hasPermssion: 0,
-	credits: "𝐏𝐫𝐢𝐲𝐚𝐧𝐬𝐡 𝐑𝐚𝐣𝐩𝐮𝐭",
-	description: "Beginner's Guide",
-	commandCategory: "system",
-	usages: "[Tên module]",
-	cooldowns: 1,
-	envConfig: {
-		autoUnsend: true,
-		delayUnsend: 300
-	}
+
+module.exports.config = {
+    name: "help",
+    version: "2.0.0",
+    hasPermssion: 0,
+    credits: "RDX_ZAIN",
+    description: "Beginner's Guide - Shows all commands with pagination",
+    commandCategory: "system",
+    usages: "[page number] or [command name]",
+    cooldowns: 1,
+    envConfig: {
+        autoUnsend: false,
+        delayUnsend: 60
+    }
 };
 
 module.exports.languages = {
-	//"vi": {
-	//	"moduleInfo": "「 %1 」\n%2\n\n❯ Cách sử dụng: %3\n❯ Thuộc nhóm: %4\n❯ Thời gian chờ: %5 giây(s)\n❯ Quyền hạn: %6\n\n» Module code by %7 «",
-	//	"helpList": '[ Hiện tại đang có %1 lệnh có thể sử dụng trên bot này, Sử dụng: "%2help nameCommand" để xem chi tiết cách sử dụng! ]"',
-	//	"user": "Người dùng",
-  //      "adminGroup": "Quản trị viên nhóm",
-  //      "adminBot": "Quản trị viên bot"
-//	},
-	"en": {
-		"moduleInfo": "「 %1 」\n%2\n\n❯ Usage: %3\n❯ Category: %4\n❯ Waiting time: %5 seconds(s)\n❯ Permission: %6\n\n» Module code by %7 «",
-		"helpList": '[ There are %1 commands on this bot, Use: "%2help nameCommand" to know how to use! ]',
-		"user": "User",
-        "adminGroup": "Admin group",
-        "adminBot": "Admin bot"
-	}
+    "en": {
+        "moduleInfo": "✥﹤┈┈┈┈┈┈┈┈﹥✥\n╰┈➤ Command: %1\n╰┈➤ Description: %2\n╰┈➤ Usage: %3\n╰┈➤ Category: %4\n╰┈➤ Cooldown: %5s\n╰┈➤ Permission: %6\n╰┈➤ By: %7\n✥﹤┈┈┈┈┈┈┈┈﹥✥",
+        "user": "User",
+        "adminGroup": "Admin Group",
+        "adminBot": "Admin Bot"
+    }
 };
 
-module.exports.handleEvent = function ({ api, event, getText }) {
-	const { commands } = global.client;
-	const { threadID, messageID, body } = event;
+module.exports.run = function ({ api, event, args, getText }) {
+    const { commands } = global.client;
+    const { threadID, messageID } = event;
 
-	if (!body || typeof body == "undefined" || body.indexOf("help") != 0) return;
-	const splitBody = body.slice(body.indexOf("help")).trim().split(/\s+/);
-	if (splitBody.length == 1 || !commands.has(splitBody[1].toLowerCase())) return;
-	const threadSetting = global.data.threadData.get(parseInt(threadID)) || {};
-	const command = commands.get(splitBody[1].toLowerCase());
-	const prefix = (threadSetting.hasOwnProperty("PREFIX")) ? threadSetting.PREFIX : global.config.PREFIX;
-	return api.sendMessage(getText("moduleInfo", command.config.name, command.config.description, `${prefix}${command.config.name} ${(command.config.usages) ? command.config.usages : ""}`, command.config.commandCategory, command.config.cooldowns, ((command.config.hasPermssion == 0) ? getText("user") : (command.config.hasPermssion == 1) ? getText("adminGroup") : getText("adminBot")), command.config.credits), threadID, messageID);
-}
+    const command = commands.get((args[0] || "").toLowerCase());
+    const threadSetting = global.data.threadData.get(parseInt(threadID)) || {};
+    const prefix = (threadSetting.hasOwnProperty("PREFIX")) ? threadSetting.PREFIX : global.config.PREFIX;
 
-module.exports. run = function({ api, event, args, getText }) {
-	const { commands } = global.client;
-	const { threadID, messageID } = event;
-	const command = commands.get((args[0] || "").toLowerCase());
-	const threadSetting = global.data.threadData.get(parseInt(threadID)) || {};
-	const { autoUnsend, delayUnsend } = global.configModule[this.config.name];
-	const prefix = (threadSetting.hasOwnProperty("PREFIX")) ? threadSetting.PREFIX : global.config.PREFIX;
-
-	if (!command) {
-		const arrayInfo = [];
-		const page = parseInt(args[0]) || 1;
-    const numberOfOnePage = 10;
-    //*số thứ tự 1 2 3.....cú pháp ${++i}*//
-    let i = 0;
-    let msg = "";
-    
-    for (var [name, value] of (commands)) {
-      name += ``;
-      arrayInfo.push(name);
+    // If command name is provided, show command details
+    if (command) {
+        return api.sendMessage(
+            getText(
+                "moduleInfo", 
+                command.config.name, 
+                command.config.description, 
+                `${prefix}${command.config.name} ${(command.config.usages) ? command.config.usages : ""}`, 
+                command.config.commandCategory, 
+                command.config.cooldowns, 
+                ((command.config.hasPermssion == 0) ? getText("user") : (command.config.hasPermssion == 1) ? getText("adminGroup") : getText("adminBot")), 
+                command.config.credits
+            ), 
+            threadID, 
+            messageID
+        );
     }
 
-    arrayInfo.sort((a, b) => a.data - b.data);
+    // Pagination system - 10 commands per page
+    const categories = {};
+    const allCommands = [];
     
-    const startSlice = numberOfOnePage*page - numberOfOnePage;
-    i = startSlice;
-    const returnArray = arrayInfo.slice(startSlice, startSlice + numberOfOnePage);
-    
-    for (let item of returnArray) msg += `「 ${++i} 」${prefix}${item}\n`;
-    
-    
-    const siu = `Command list 📄\nMade by 𝐒𝐔𝐇𝐄𝐁 𝐊𝐇𝐀𝐍 🥀\nFor More Information type /help (command name) ✨\n󰂆 󰟯 󰟰 󰟷 󰟺 󰟵 󰟫`;
-    
- const text = `\nPage (${page}/${Math.ceil(arrayInfo.length/numberOfOnePage)})\n`;
- 
-    return api.sendMessage(siu + "\n\n" + msg  + text, threadID, async (error, info) => {
-			if (autoUnsend) {
-				await new Promise(resolve => setTimeout(resolve, delayUnsend * 1000));
-				return api.unsendMessage(info.messageID);
-			} else return;
-		}, event.messageID);
-	}
+    for (const [name, value] of commands) {
+        const category = value.config.commandCategory || "Uncategorized";
+        if (!categories[category]) categories[category] = [];
+        categories[category].push(name);
+        allCommands.push({ name, category });
+    }
 
-	return api.sendMessage(getText("moduleInfo", command.config.name, command.config.description, `${prefix}${command.config.name} ${(command.config.usages) ? command.config.usages : ""}`, command.config.commandCategory, command.config.cooldowns, ((command.config.hasPermssion == 0) ? getText("user") : (command.config.hasPermssion == 1) ? getText("adminGroup") : getText("adminBot")), command.config.credits), threadID, messageID);
+    const page = parseInt(args[0]) || 1;
+    const commandsPerPage = 10;
+    const totalPages = Math.ceil(allCommands.length / commandsPerPage);
+    
+    if (page < 1 || page > totalPages) {
+        return api.sendMessage(`Invalid page number! Total pages: ${totalPages}`, threadID, messageID);
+    }
+
+    const startIndex = (page - 1) * commandsPerPage;
+    const endIndex = startIndex + commandsPerPage;
+    const pageCommands = allCommands.slice(startIndex, endIndex);
+
+    let msg = "✥﹤┈┈┈┈┈┈┈┈﹥✥\n";
+    msg += "     COMMAND LIST\n";
+    msg += "✥﹤┈┈┈┈┈┈┈┈﹥✥\n\n";
+
+    let currentCategory = "";
+    pageCommands.forEach((cmd) => {
+        if (cmd.category !== currentCategory) {
+            if (currentCategory !== "") msg += "\n";
+            msg += `✿ ${cmd.category.toUpperCase()}\n`;
+            currentCategory = cmd.category;
+        }
+        msg += `╰┈➤${cmd.name}\n`;
+    });
+
+    msg += `\n✥﹤┈┈┈┈┈┈┈┈﹥✥\n`;
+    msg += `Page ${page}/${totalPages}\n`;
+    msg += `Total: ${commands.size} commands\n`;
+    msg += `✥﹤┈┈┈┈┈┈┈┈﹥✥\n\n`;
+    msg += `Use ${prefix}help <command> for details\n`;
+    msg += `Use ${prefix}help <page> for next page`;
+
+    return api.sendMessage(msg, threadID, messageID);
 };
